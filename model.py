@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 # 1. Load
 with open("power.csv") as f:
     skip = next(i for i, line in enumerate(f) if "-END HEADER-" in line) + 1
@@ -40,3 +41,4 @@ baseline = (test["PRECTOTCORR"] > 1).astype(int)
 print("Rain days share:", round(test["target"].mean(), 2))
 print("Baseline accuracy:", accuracy_score(test["target"], baseline))
 print("Model accuracy:   ", accuracy_score(test["target"], pred))
+print(confusion_matrix(test["target"], pred))
