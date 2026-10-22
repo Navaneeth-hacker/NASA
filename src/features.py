@@ -98,8 +98,10 @@ class UniversalFeatureEngineer:
         if self.config.drop_initial_nans:
             max_window = max(max(self.config.lag_days), max(self.config.rolling_windows))
             initial_len = len(df)
-            df = df.iloc[max_window:].copy()
-            logger.info(f"Dropped first {max_window} warmup rows. Rows: {initial_len} -> {len(df)}")
+            drop_count = min(max_window, max(0, initial_len - 10))
+            if drop_count > 0:
+                df = df.iloc[drop_count:].copy()
+                logger.info(f"Dropped first {drop_count} warmup rows. Rows: {initial_len} -> {len(df)}")
 
         df = df.bfill().ffill()
         logger.info(f"Feature engineering complete. Final feature matrix shape: {df.shape}")

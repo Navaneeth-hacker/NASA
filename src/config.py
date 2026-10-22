@@ -6,7 +6,7 @@ Allows switching datasets (NASA API, local CSV, NetCDF) without code changes.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -20,12 +20,13 @@ class DatasetConfig:
     start_date: str = "20200101"     # YYYYMMDD
     end_date: str = "20251231"
     
-    # File paths (if CSV / NetCDF based)
+    # File paths & sources (if CSV / NetCDF based)
     file_path: Optional[str] = "power.csv"
+    file_source: Optional[Any] = None  # Buffer, UploadedFile, Bytes, or StringIO
     date_column: Optional[str] = None  # Auto-detected if None
     
     # Missing value sentinels used by NASA POWER and meteorological datasets
-    sentinel_values: List[float] = field(default_factory=lambda: [-999.0, -9999.0, 9999.0])
+    sentinel_values: List[float] = field(default_factory=lambda: [-999.0, -9999.0, 9999.0, -999])
     
     # Canonical column rename map
     column_mapping: Dict[str, str] = field(default_factory=lambda: {
