@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "last_updated": "2026-10-22T18:44:12.739086+00:00",
+  "datasets": [
+    {
+      "dataset_id": "ef1fa71d-0bda-438f-bda8-0cdcc4ef4e51",
+      "name": "Kollam Climate Baseline (2005\u20132025)",
+      "description": "Daily native resolution climate data for latitude 8.89, longitude 76.61 (Kollam, Kerala). Contains T2M, PRECTOTCORR, and RH2M.",
+      "source": "NASA POWER Daily Point API (MERRA-2)",
+      "source_type": "local_file",
+      "format": "csv",
+      "schema": {
+        "columns": {
+          "YEAR": "int32",
+          "DOY": "int64",
+          "T2M": "float64",
+          "PRECTOTCORR": "float64",
+          "RH2M": "float64",
+          "date": "datetime64[us]"
+        },
+        "numeric_columns": [
+          "YEAR",
+          "DOY",
+          "T2M",
+          "PRECTOTCORR",
+          "RH2M"
+        ],
+        "date_range": [
+          "2005-01-01",
+          "2025-12-31"
+        ],
+        "weather_mapping": {
+          "temperature": "T2M",
+          "rainfall": "PRECTOTCORR",
+          "humidity": "RH2M",
+          "wind": null,
+          "solar": null,
+          "pressure": null
+        },
+        "shape": [
+          7670,
+          6
+        ]
+      },
+      "created_at": "2026-10-22T18:27:25.338592+00:00",
+      "imported_at": "2026-10-22T18:27:25.338612+00:00",
+      "status": "ready",
+      "record_count": 7670,
+      "size_bytes": 203492,
+      "checksum": "4636458d8198374ffbf49774dec648a9bb3a0506f7deedff6ee0e180ff054155",
+      "version": 1,
+      "errors": [],
+      "processing_history": [
+        {
+          "timestamp": "2026-10-22T18:27:25.338621+00:00",
+          "action": "import",
+          "details": "Imported 7670 rows with 6 columns."
+        }
+      ],
+      "raw_path": "data\\raw\\ef1fa71d-0bda-438f-bda8-0cdcc4ef4e51\\power.csv",
+      "clean_path": "data\\clean\\ef1fa71d-0bda-438f-bda8-0cdcc4ef4e51.parquet",
+      "tags": [],
+      "is_combined": false,
+      "parent_ids": []
+    },
+    {
+      "dataset_id": "da68af53-63a3-4737-af0a-16e702ac9d6e",
+      "name": "Kollam Climate Sample (Q1 2005)",
+      "description": "100-day verified sample slice of Kollam daily climate observations with normalized fields.",
+      "source": "Curated Clean Sample",
+      "source_type": "local_file",
+      "format": "csv",
+      "schema": {
+        "columns": {
+          "date": "datetime64[us]",
+          "year": "int64",
+          "doy": "int64",
+          "temp_mean_c": "float64",
+          "rainfall_mm": "float64",
+          "humidity_pct": "float64",
+          "month": "int64",
+          "day": "int64",
+          "day_of_week": "int64",
+          "day_of_year": "int64",
+          "quarter": "int64",
+          "is_weekend": "int64",
+          "YEAR": "int32"
+        },
+        "numeric_columns": [
+          "year",
+          "doy",
+          "temp_mean_c",
+          "rainfall_mm",
+          "humidity_pct",
+          "month",
+          "day",
+          "day_of_week",
+          "day_of_year",
+          "quarter",
+          "is_weekend",
+          "YEAR"
+        ],
+        "date_range": [
+          "2005-01-01",
+          "2005-04-10"
+        ],
+        "weather_mapping": {
+          "temperature": "temp_mean_c",
+          "rainfall": "rainfall_mm",
+          "humidity": "humidity_pct",
+          "wind": null,
+          "solar": null,
+          "pressure": null
+        },
+        "shape": [
+          100,
+          13
+        ]
+      },
+      "created_at": "2026-10-22T18:27:25.375569+00:00",
+      "imported_at": "2026-10-22T18:27:25.375588+00:00",
+      "status": "ready",
+      "record_count": 100,
+      "size_bytes": 5097,
+      "checksum": "d55f956d0120889288c6b548d415ac5341ca9266f7b8d146d4e8b07782f1b1e7",
+      "version": 1,
+      "errors": [],
+      "processing_history": [
+        {
+          "timestamp": "2026-10-22T18:27:25.375599+00:00",
+          "action": "import",
+          "details": "Imported 100 rows with 13 columns."
+        }
+      ],
+      "raw_path": "data\\raw\\da68af53-63a3-4737-af0a-16e702ac9d6e\\kollam_climate_sample.csv",
+      "clean_path": "data\\clean\\da68af53-63a3-4737-af0a-16e702ac9d6e.parquet",
+      "tags": [],
+      "is_combined": false,
+      "parent_ids": []
+    }
+  ]
+}

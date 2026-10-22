@@ -318,40 +318,30 @@ class BaseDataLoader(ABC):
 
 
 class NasaPowerLoader(BaseDataLoader):
-    """NASA POWER Daily Point API Loader."""
-
-    BASE_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
+    """NASA POWER Daily Point API Loader utilizing the formal NasaPowerAdapter."""
 
     def load(self) -> pd.DataFrame:
-        logger.info(
-            f"Fetching NASA POWER API: Lat={self.config.latitude}, "
-            f"Lon={self.config.longitude}, Range={self.config.start_date} to {self.config.end_date}"
+        from src.adapters.nasa_power import NasaPowerAdapter
+
+        adapter = NasaPowerAdapter()
+        payload, err = adapter.fetch(
+            latitude=self.config.latitude,
+            longitude=self.config.longitude,
+            start_date=self.config.start_date,
+            end_date=self.config.end_date,
         )
 
-        params = {
-            "parameters": "T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PS",
-            "community": "AG",
-            "longitude": self.config.longitude,
-            "latitude": self.config.latitude,
-            "start": self.config.start_date,
-            "end": self.config.end_date,
-            "format": "JSON",
-        }
-
-        response = requests.get(self.BASE_URL, params=params, timeout=60)
-        response.raise_for_status()
-        raw_json = response.json()
+        if err or payload is None:
+            raise RuntimeError(f"NASA POWER fetch failed: {err.message if err else 'Unknown error'}")
 
         # Cache raw JSON
         raw_json_path = Path("data/raw") / f"{self.config.name}_raw.json"
         raw_json_path.parent.mkdir(parents=True, exist_ok=True)
         with open(raw_json_path, "w", encoding="utf-8") as f:
-            json.dump(raw_json, f, indent=2)
+            json.dump(payload, f, indent=2)
 
-        data_dict = raw_json["properties"]["parameter"]
-        df = pd.DataFrame(data_dict)
-        df.index = pd.to_datetime(df.index, format="%Y%m%d")
-        df.index.name = "date"
+        df = adapter.normalize(payload)
+        df.set_index("date", inplace=True)
         return df
 
 

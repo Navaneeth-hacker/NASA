@@ -1,68 +1,103 @@
-# Climate Intelligence Dashboard
+# Climate Intelligence & Multi-Dataset Studio
 
-A flexible Streamlit dashboard for exploring climate, weather, and time-series data, with a Random Forest estimate of whether the day after the latest observation will receive more than 1 mm of rain.
+A full-stack climate and meteorological data intelligence platform with an enterprise-grade multi-dataset architecture, time-series combination engine, official NASA POWER API integration, and Random Forest rain forecasting.
 
-**Universal Data Support:** Any CSV file thrown into the dashboard (via drag-and-drop upload or placed in the directory) will load and work seamlessly!
+---
 
-## Key Features
+## 🌟 Architecture Overview
 
-- **Universal CSV Ingestion:**
-  - **Headers & Preambles:** Automatically skips NASA POWER headers (`-BEGIN HEADER-` ... `-END HEADER-`), metadata comments (`#`, `//`, `;`), or clean headerless CSVs.
-  - **Delimiters:** Auto-detects comma (`,`), semicolon (`;`), tab (`\t`), and pipe (`|`).
-  - **Encodings:** Supports UTF-8, UTF-8-BOM, CP1252, and Latin-1.
-  - **Dates:** Resolves NASA `YEAR` + `DOY`, `YEAR` + `MO` + `DY`, ISO dates (`YYYY-MM-DD`), timestamps, or custom formats. If a CSV has no dates, a synthetic daily timeline is automatically generated so features and charts never break.
-  - **Sentinels & Missing Values:** Cleans meteorological missing values (`-999`, `-999.0`, `-9999`, `9999`, `NA`, `null`, etc.) with time-series interpolation.
-  - **Smart Column Detection & Mapping:** Automatically matches temperature, precipitation/rainfall, and relative humidity from common synonyms (e.g., `T2M`, `temp`, `tavg`, `PRECTOTCORR`, `rainfall`, `prcp`, `RH2M`, `humidity`), with an interactive sidebar mapping override.
-- **Machine Learning Rain Prediction:**
-  - Tomorrow's rain prediction using a trained Random Forest model (`model.pkl`).
-  - If weather columns are present, builds rolling lag features and displays rain likelihood for the day after the last observation.
-  - If weather columns are not present, gracefully displays general multi-metric exploration without crashing.
-- **Interactive Visualizations:**
-  - Configurable aggregation frequencies: Monthly, Weekly, or Daily.
-  - Interactive Plotly charts for Rainfall, Temperature, or any custom numeric metrics in uploaded CSVs.
-  - Filtering by Year or date range with Select All / Clear All controls.
-- **Data Table & Export:**
-  - Filtered table viewer, summary statistics (`describe()`), and one-click processed CSV download.
-
-## Project Structure
-
-- `app.py` — Streamlit dashboard with file upload, auto-column mapping, year filtering, charts, rain prediction, and CSV export.
-- `model.py` — Script that trains and evaluates the Random Forest classifier on any weather CSV and saves to `model.pkl`.
-- `model.pkl` — Serialized classifier used by the dashboard.
-- `power.csv` — Default NASA POWER daily climate data (2005–2025).
-- `src/` — Modular data pipeline:
-  - `src/config.py`: Dataset configuration and canonical column mappings.
-  - `src/load.py`: Universal CSV loader (`read_universal_csv`), column detector (`detect_weather_columns`), and API/NetCDF loaders.
-  - `src/clean.py`: `UniversalDataCleaner` for missing value handling, date index enforcement, and calendar features.
-  - `src/features.py`: Time-series feature engineering (lags, rolling stats, cyclical encoding).
-
-## Running the Dashboard
-
-Ensure dependencies are installed:
-
-```sh
-python -m pip install pandas plotly streamlit joblib scikit-learn
+```mermaid
+flowchart TD
+    A["Raw Sources: CSV / JSON / NASA POWER API"] --> B["Ingestion & Validation Engine (src/validation.py)"]
+    B --> C["Persistent Dataset Registry (src/registry.py)"]
+    C --> D["Storage Isolation: data/raw/ & data/clean/"]
+    D --> E["Multi-Dataset Studio & Combiner (src/combiner.py)"]
+    D --> F["Interactive Streamlit Dashboard (app.py)"]
+    E --> C
+    F --> G["Random Forest Rain Predictor (model.pkl)"]
 ```
 
-Launch the dashboard:
+---
+
+## 🚀 Key Modules & Capabilities
+
+### 1. Multi-Dataset Registry (`src/registry.py`)
+- **Stable Dataset Identity:** Assigns every dataset an immutable UUID (`dataset_id`) independent of filenames.
+- **Storage Isolation:** Separates raw source files (`data/raw/<dataset_id>/`) from processed artifacts (`data/clean/<dataset_id>.parquet`).
+- **Atomic Catalog Persistence:** Maintains `data/registry/registry.json` using atomic replace writes with zero risk of corruption.
+- **Deduplication:** Automatic SHA-256 fingerprinting prevents duplicate imports.
+- **Lifecycle Management:** Full search, filtering by source/type, sorting, pagination, and safe deletion.
+
+### 2. Validation & Ingestion Engine (`src/validation.py`)
+- **Format Sniffing:** Detects CSV, TSV, JSON, JSONL, Parquet, and NASA POWER formats using structural content inspection.
+- **Failure Isolation:** Batch ingestion guarantees that a single malformed file never aborts valid sibling datasets.
+- **Detailed Auditing:** Generates actionable `ValidationReport` objects covering schema, missingness, and data types.
+- **Safety Safeguards:** 100 MB file size limit and path traversal defenses.
+
+### 3. Multi-Dataset Combination Studio (`src/combiner.py`)
+- **Time-Series Concatenation:** Merges segmented temporal periods with automatic deduplication of overlapping dates.
+- **Horizontal Feature Join:** Merges complementary parameter streams on shared date/timestamp keys with clean suffix assignment.
+- **Compatibility Verification:** Rigorous checks on shared columns, data types, and key presence before any merge.
+- **Provenance Preservation:** Combined datasets reference their parent dataset IDs (`parent_ids`) without mutating source records.
+
+### 4. NASA POWER API Integration (`src/adapters/nasa_power.py`)
+- **Official Client Contract:** Implements `discover`, `fetch`, `validate`, `normalize`, `metadata`, and `errors`.
+- **Global Ingestion:** Query daily meteorological observations for any global latitude/longitude directly through the UI.
+- **Reliability:** Built-in exponential backoff, rate limit handling (HTTP 429), and timeout management.
+
+### 5. Interactive Streamlit Studio (`app.py`)
+- **Tab 1: 📊 Dataset Dashboard:** Single-dataset deep-dive with KPIs, frequency resampling (Monthly/Weekly/Daily), Plotly charts, and tomorrow's rain probability forecast.
+- **Tab 2: 🔗 Multi-Dataset Studio:** Side-by-side comparison tables, synchronized multi-station time-series graphs, and one-click validated combinations.
+- **Tab 3: 🗃️ Dataset Library:** Searchable registry catalog, schema inspector, batch file uploader, and deletion guard.
+- **Tab 4: 🛰️ Live NASA Ingestion:** Interactive coordinate picker with presets (Kollam, Delhi, London, NYC, Nairobi, Sydney) and parameter filters.
+
+---
+
+## 🛠️ Installation & Setup
+
+1. **Clone and Navigate to Workspace:**
+   ```sh
+   cd C:/Users/Navan/Downloads/NASA
+   ```
+
+2. **Install Required Packages:**
+   ```sh
+   python -m pip install pandas plotly streamlit joblib scikit-learn requests pyarrow
+   ```
+
+3. **Launch the Application:**
+   ```sh
+   python -m streamlit run app.py
+   ```
+
+---
+
+## 🧪 Automated Testing
+
+The project includes an automated test suite across unit, integration, and UI layers:
 
 ```sh
-python -m streamlit run app.py
+# Run the entire test suite
+python -m unittest discover tests
+
+# Or run individual test modules:
+python -m unittest tests/test_registry.py
+python -m unittest tests/test_validation.py
+python -m unittest tests/test_combiner.py
+python -m unittest tests/test_adapters.py
+python -m unittest tests/test_app_integration.py
 ```
 
-Then either:
-1. Use the default `power.csv` dataset, OR
-2. Drag and drop any CSV file into the **"Throw any CSV file here"** sidebar uploader, OR
-3. Select any local `.csv` file from the workspace dropdown.
+---
 
-## Retraining the Model
+## 🧠 Model Training
 
-To retrain the prediction model on `power.csv` or any other weather CSV:
+To retrain the Random Forest classifier on any dataset:
 
 ```sh
-# On default power.csv
+# Retrain on default baseline
 python model.py
 
-# Or on any other CSV file
-python model.py path/to/your_weather_data.csv
+# Or retrain on any custom CSV
+python model.py path/to/dataset.csv
 ```
