@@ -24,9 +24,9 @@ df = load_data()
 
 years = sorted(df["YEAR"].unique())
 selected = st.sidebar.multiselect("Year", years, default=years)
-df = df[df["YEAR"].isin(selected)]
+df_filtered = df[df["YEAR"].isin(selected)]
 
-monthly = df.set_index("date").resample("MS").agg(
+monthly = df_filtered.set_index("date").resample("MS").agg(
     {"T2M": "mean", "PRECTOTCORR": "sum", "RH2M": "mean"}
 ).reset_index()
 
@@ -39,7 +39,6 @@ col2.plotly_chart(
     px.line(monthly, x="date", y="T2M", title="Monthly avg temperature (°C)"),
     use_container_width=True,
 )
-import joblib
 
 st.subheader("Tomorrow's rain prediction")
 
@@ -51,15 +50,16 @@ full["rain_avg3"] = full["PRECTOTCORR"].rolling(3).mean()
 full["rh_avg3"] = full["RH2M"].rolling(3).mean()
 full["month"] = full["date"].dt.month
 
-features = ["T2M", "T2M_yesterday", "T2M_avg7", "PRECTOTCORR",
-            "rain_avg7", "RH2M", "month", "rain_avg3", "rh_avg3"]
-
 model = joblib.load("model.pkl")
-last = full.iloc[[-1]]
-prob = model.predict_proba(last[features])[0][1]
 
-st.metric("Chance of rain after " + str(last["date"].iloc[0].date()),
-          f"{prob:.0%}")
+# Use the exact features the saved model was trained on
+expected_features = list(model.feature_names_in_)
+
+last = full.iloc[[-1]]
+prob = model.predict_proba(last[expected_features])[0][1]
+
+st.metric("Chance of rain after " + str(last["date"].iloc[0].date()), f"{prob:.0%}")
+
 st.subheader("Data")
-st.dataframe(df)
-st.download_button("Download CSV", df.to_csv(index=False), "kollam.csv")
+st.dataframe(df_filtered)
+st.download_button("Download CSV", df_filtered.to_csv(index=False), "kollam.csv")
