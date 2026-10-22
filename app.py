@@ -367,12 +367,12 @@ with tab_combined:
                         "Columns": len(df_item.columns),
                     })
 
-            st.write("#### 📊 Selected Datasets Inventory")
+            st.write("####Selected Datasets Inventory")
             st.dataframe(pd.DataFrame(comp_rows), use_container_width=True)
 
             # Sub-Section: Visual Cross-Comparison
             st.divider()
-            st.write("#### 📈 Synchronized Multi-Dataset Visualization")
+            st.write("#### Synchronized Multi-Dataset Visualization")
 
             # Find common numeric columns across selected datasets
             common_numeric = None
@@ -413,7 +413,7 @@ with tab_combined:
 
             # Sub-Section: Dataset Combination Execution
             st.divider()
-            st.write("#### ⚙️ Execute Validated Dataset Combination")
+            st.write("####  Execute Validated Dataset Combination")
 
             op_type = st.radio(
                 "Combination Strategy:",
@@ -425,7 +425,7 @@ with tab_combined:
             )
 
             if op_type.startswith("Concatenation"):
-                st.info("ℹ️ **Concatenation** merges records along the chronological time axis. Overlapping dates are cleanly deduplicated.")
+                st.info(" **Concatenation** merges records along the chronological time axis. Overlapping dates are cleanly deduplicated.")
                 # Pairwise compatibility check
                 id1, id2 = selected_combine_ids[0], selected_combine_ids[1]
                 m1, m2 = registry.get(id1), registry.get(id2)
@@ -438,9 +438,9 @@ with tab_combined:
 
                 with col_c2:
                     if check.warnings:
-                        st.warning("⚠️ " + "\n\n⚠️ ".join(check.warnings))
+                        st.warning("" + "\n\n ".join(check.warnings))
                     if check.errors:
-                        st.error("❌ " + "\n\n❌ ".join(check.errors))
+                        st.error(" " + "\n\n❌ ".join(check.errors))
 
                 combined_name_input = st.text_input(
                     "Combined Dataset Name:",
@@ -448,7 +448,7 @@ with tab_combined:
                     key="concat_name_input",
                 )
 
-                if st.button("🚀 Execute Concatenation & Register", disabled=(not check.is_compatible), key="btn_run_concat"):
+                if st.button("Execute Concatenation & Register", disabled=(not check.is_compatible), key="btn_run_concat"):
                     try:
                         with st.spinner("Executing time-series concatenation..."):
                             meta_out, _ = combiner.concatenate_datasets(
@@ -462,7 +462,7 @@ with tab_combined:
                         st.error(f"Concatenation error: {e}")
 
             else:
-                st.info("ℹ️ **Join** merges complementary variables horizontally on matching dates. Variables with duplicate names receive clean suffixes.")
+                st.info("**Join** merges complementary variables horizontally on matching dates. Variables with duplicate names receive clean suffixes.")
                 if len(selected_combine_ids) != 2:
                     st.warning("Please select exactly two datasets to perform a horizontal join.")
                 else:
@@ -477,9 +477,9 @@ with tab_combined:
 
                     with jcol2:
                         if check_j.warnings:
-                            st.warning("⚠️ " + "\n\n⚠️ ".join(check_j.warnings))
+                            st.warning(" " + "\n\n ".join(check_j.warnings))
                         if check_j.errors:
-                            st.error("❌ " + "\n\n❌ ".join(check_j.errors))
+                            st.error(" " + "\n\n ".join(check_j.errors))
 
                     join_name_input = st.text_input(
                         "Joined Dataset Name:",
@@ -487,7 +487,7 @@ with tab_combined:
                         key="join_name_input",
                     )
 
-                    if st.button("🚀 Execute Join & Register", disabled=(not check_j.is_compatible), key="btn_run_join"):
+                    if st.button(" Execute Join & Register", disabled=(not check_j.is_compatible), key="btn_run_join"):
                         try:
                             with st.spinner("Executing horizontal merge..."):
                                 meta_out, _ = combiner.join_datasets(
@@ -509,12 +509,12 @@ with tab_combined:
 # TAB 3: Dataset Library & Management
 # =========================================================
 with tab_library:
-    st.subheader("🗃️ Dataset Catalog & Management")
+    st.subheader(" Dataset Catalog & Management")
     st.caption("Manage persistent dataset registry, batch ingest files with failure isolation, and inspect schema provenance.")
 
     # Search and Filter
     scol1, scol2 = st.columns([3, 1])
-    search_q = scol1.text_input("🔍 Search datasets by name, ID, or description:", key="lib_search")
+    search_q = scol1.text_input(" Search datasets by name, ID, or description:", key="lib_search")
     source_filter = scol2.selectbox("Filter Source:", ["All", "local_file", "file_upload", "nasa_api", "combined"], key="lib_source_filter")
 
     filtered_catalog = registry.list_datasets(
@@ -532,7 +532,7 @@ with tab_library:
             "Format": d.format,
             "Rows": f"{d.record_count:,}",
             "Size (KB)": f"{d.size_bytes / 1024:.1f}",
-            "Combined": "🔗 Yes" if d.is_combined else "No",
+            "Combined": " Yes" if d.is_combined else "No",
             "Imported At": d.imported_at[:19].replace("T", " "),
         })
 
@@ -540,7 +540,7 @@ with tab_library:
 
     # Batch Ingestion Section
     st.divider()
-    st.write("#### 📦 Batch Dataset Ingestion")
+    st.write("#### Batch Dataset Ingestion")
     st.caption("Upload multiple files at once. Ingestion failure isolation guarantees one bad file will not disrupt valid files.")
 
     batch_files = st.file_uploader(
@@ -550,7 +550,7 @@ with tab_library:
         key="batch_file_uploader",
     )
 
-    if batch_files and st.button("🚀 Process Batch Ingestion", key="btn_run_batch"):
+    if batch_files and st.button(" Process Batch Ingestion", key="btn_run_batch"):
         progress_bar = st.progress(0)
         status_text = st.empty()
         batch_results = []
@@ -574,7 +574,7 @@ with tab_library:
         for r in batch_results:
             batch_summary.append({
                 "Filename": r.filename,
-                "Status": "✅ Success" if r.success else "❌ Failed",
+                "Status": " Success" if r.success else " Failed",
                 "Dataset ID": r.dataset_id[:8] if r.dataset_id else "N/A",
                 "Duplicate": "Yes" if r.is_duplicate else "No",
                 "Details": r.error_message if not r.success else "Ready",
@@ -584,7 +584,7 @@ with tab_library:
 
     # Individual Dataset Inspection and Management
     st.divider()
-    st.write("#### 🔍 Dataset Inspector & Maintenance")
+    st.write("#### Dataset Inspector & Maintenance")
 
     inspect_id = st.selectbox(
         "Choose dataset to inspect or delete:",
@@ -621,7 +621,7 @@ with tab_library:
             # Deletion guard
             del_col1, del_col2 = st.columns([2, 1])
             confirm_del = del_col1.checkbox(f"I confirm that I want to delete dataset '{target_meta.name}'", key="confirm_delete_chk")
-            if del_col2.button("🗑️ Delete Dataset", disabled=(not confirm_del), key="btn_delete_dataset"):
+            if del_col2.button(" Delete Dataset", disabled=(not confirm_del), key="btn_delete_dataset"):
                 registry.delete_dataset(inspect_id, purge_files=True)
                 st.success(f"Dataset '{target_meta.name}' successfully deleted.")
                 st.rerun()
@@ -631,7 +631,7 @@ with tab_library:
 # TAB 4: Live NASA Ingestion
 # =========================================================
 with tab_nasa:
-    st.subheader("🛰️ Live NASA POWER Data Ingestion")
+    st.subheader(" Live NASA POWER Data Ingestion")
     st.caption("Directly fetch daily meteorological observations from NASA's MERRA-2 and satellite feeds for any global coordinates.")
 
     nasa_adapter = NasaPowerAdapter()
@@ -639,7 +639,7 @@ with tab_nasa:
 
     col_geo, col_time = st.columns(2)
     with col_geo:
-        st.write("#### 📍 Spatial Coordinates")
+        st.write("####  Spatial Coordinates")
         preset_locations = {
             "Custom Coordinates": (8.89, 76.61),
             "Kollam, Kerala (Default)": (8.8932, 76.6141),
@@ -656,7 +656,7 @@ with tab_nasa:
         lon_val = st.number_input("Longitude [-180.0 to 180.0]:", value=default_lon, min_value=-180.0, max_value=180.0, format="%.4f", key="nasa_lon")
 
     with col_time:
-        st.write("#### 📅 Temporal Range")
+        st.write("#### Temporal Range")
         today = date.today()
         default_start = today - timedelta(days=365 * 2)
         default_end = today - timedelta(days=60)  # NASA POWER MERRA-2 has ~1-2 month latency
@@ -679,7 +679,7 @@ with tab_nasa:
         key="nasa_name_input",
     )
 
-    if st.button("🚀 Fetch from NASA & Register Dataset", key="btn_fetch_nasa"):
+    if st.button(" Fetch from NASA & Register Dataset", key="btn_fetch_nasa"):
         if start_dt > end_dt:
             st.error("Start Date must precede End Date.")
         elif not selected_params:
