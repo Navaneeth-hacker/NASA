@@ -42,3 +42,5 @@ print("Rain days share:", round(test["target"].mean(), 2))
 print("Baseline accuracy:", accuracy_score(test["target"], baseline))
 print("Model accuracy:   ", accuracy_score(test["target"], pred))
 print(confusion_matrix(test["target"], pred))
+import joblib
+joblib.dump(model, "model.pkl")
